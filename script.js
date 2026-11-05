@@ -2,9 +2,12 @@
 (() => {
   "use strict";
 
-  const MAX_PLAYERS = 10;
+  /** 運用上の人数制限はなし。桁の打ち間違いで画面が固まらないための安全値（Code.gs と同じ値にする） */
+  const MAX_PLAYERS = 999;
   /** 年代の値（保存されるのは常にこの日本語の値。表示名は i18n.js の "age.○○"） */
   const AGE_VALUES = ["小学生未満", "小学生", "中学生", "高校生", "成人"];
+  /** 性別の値（保存されるのは常にこの日本語の値。表示名は i18n.js の "gender.○○"） */
+  const GENDER_VALUES = ["男性", "女性", "その他", "回答しない"];
 
   const { LANGS, DICT, TERMS } = window.I18N;
 
@@ -102,6 +105,10 @@
     sel.setAttribute("aria-label", tp("ageAria", { n }));
     $("option[value='']", sel).textContent = tp("agePlaceholder");
     $$("option[data-age]", sel).forEach((o) => (o.textContent = tp("age." + o.value)));
+    const genderSel = $(".gender", row);
+    genderSel.setAttribute("aria-label", tp("genderAria", { n }));
+    $("option[value='']", genderSel).textContent = tp("genderPlaceholder");
+    $$("option[data-gender]", genderSel).forEach((o) => (o.textContent = tp("gender." + o.value)));
   }
 
   /* ---------- 言語を適用 ---------- */
@@ -226,6 +233,12 @@
           <option value="" selected disabled></option>
           ${AGE_VALUES.map((a) => `<option value="${a}" data-age></option>`).join("")}
         </select>
+      </span>
+      <span class="select-wrap">
+        <select class="field gender" id="gender-${id}" required>
+          <option value="" selected disabled></option>
+          ${GENDER_VALUES.map((g) => `<option value="${g}" data-gender></option>`).join("")}
+        </select>
       </span>`;
     labelRow(row);
     return row;
@@ -263,20 +276,24 @@
     const list = $$(".player-row", rows).map((row) => ({
       nickname: $(".nick", row).value.trim(),
       age: $(".age", row).value,
+      gender: $(".gender", row).value,
       nickEl: $(".nick", row),
       ageEl: $(".age", row),
+      genderEl: $(".gender", row),
     }));
-    const bad = list.filter((p) => !p.nickname || !p.age);
+    const bad = list.filter((p) => !p.nickname || !p.age || !p.gender);
     if (bad.length) {
       list.forEach((p) => {
         if (!p.nickname) p.nickEl.classList.add("is-invalid");
         if (!p.age) p.ageEl.classList.add("is-invalid");
+        if (!p.gender) p.genderEl.classList.add("is-invalid");
       });
       setMsg(msg3, "errPlayers");
-      (bad[0].nickname ? bad[0].ageEl : bad[0].nickEl).focus();
+      const first = bad[0];
+      (!first.nickname ? first.nickEl : !first.age ? first.ageEl : first.genderEl).focus();
       return;
     }
-    state.players = list.map(({ nickname, age }) => ({ nickname, age }));
+    state.players = list.map(({ nickname, age, gender }) => ({ nickname, age, gender }));
     show(4);
   });
   rows.addEventListener("input", (e) => e.target.classList.remove("is-invalid"));
@@ -316,7 +333,7 @@
       groupID: state.groupID,
       timeStamp: formatTimeStamp(now),
       games: state.games,
-      players: state.players.map((p) => ({ name: p.nickname, age: p.age })),
+      players: state.players.map((p) => ({ name: p.nickname, age: p.age, gender: p.gender })),
     });
   });
 

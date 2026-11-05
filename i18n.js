@@ -83,6 +83,15 @@ window.I18N = {
     "age.中学生":     { ja: "中学生",     hira: "ちゅうがくせい",       ruby: "中学生",            en: "Junior high" },
     "age.高校生":     { ja: "高校生",     hira: "こうこうせい",         ruby: "高校生",            en: "High school" },
     "age.成人":       { ja: "成人",       hira: "せいじん(おとな)",     ruby: "成人(せいじん)",    en: "Adult" },
+    genderAria: {
+      ja: "プレイヤー{n}の性別", hira: "プレイヤー{n}の せいべつ", ruby: "プレイヤー{n}の性別", en: "Player {n} gender",
+    },
+    genderPlaceholder: { ja: "性別", hira: "せいべつ", ruby: "性別(せいべつ)", en: "Gender" },
+    /* キー（男性 など）は保存される値なので変えないでください */
+    "gender.男性":       { ja: "男性",       hira: "だんせい",       ruby: "男性(だんせい)",     en: "Male" },
+    "gender.女性":       { ja: "女性",       hira: "じょせい",       ruby: "女性(じょせい)",     en: "Female" },
+    "gender.その他":     { ja: "その他",     hira: "そのた",         ruby: "その他(た)",         en: "Other" },
+    "gender.回答しない": { ja: "回答しない", hira: "かいとうしない", ruby: "回答(かいとう)しない", en: "Prefer not to say" },
 
     errCountRange: {
       ja:   "人数は1〜{max}人で入力してください。",
@@ -97,10 +106,10 @@ window.I18N = {
       en:   "Please enter a number of players from 1 to {max}.",
     },
     errPlayers: {
-      ja:   "すべてのプレイヤーのニックネームと年代を入力してください。",
-      hira: "みんなの ニックネームと ねんだいを いれてください。",
-      ruby: "すべてのプレイヤーのニックネームと{年代|ねんだい}を{入力|にゅうりょく}してください。",
-      en:   "Please enter a nickname and age group for every player.",
+      ja:   "すべてのプレイヤーのニックネーム、年代、性別を入力してください。",
+      hira: "みんなの ニックネーム、ねんだい、せいべつを いれてください。",
+      ruby: "すべてのプレイヤーのニックネーム、{年代|ねんだい}、{性別|せいべつ}を{入力|にゅうりょく}してください。",
+      en:   "Please enter a nickname, age group, and gender for every player.",
     },
 
     /* ---------- ⑤ チュートリアル ---------- */
@@ -221,10 +230,10 @@ window.I18N = {
       ruby: "{個人情報|こじんじょうほう}の{扱|あつか}いに{関|かん}する{規約|きやく}",
       en:   "Handling of personal information" },
     { type: "li",
-      ja:   "入力された情報(ニックネーム, 年代)については、以下の用途にて利用します。<br>-1. ゲームの進行<br>-2. ランキング表示<br>-3. ゲームごとの累計プレイ人数および年代推移<br>",
-      hira: "いれた じょうほう(ニックネーム、ねんだい)は、つぎの ことに つかいます。<br>-1. ゲームを すすめる ため<br>-2. ランキングを ひょうじする ため<br>-3. ゲームごとの あそんだ ひとの かずと ねんだいの うつりかわり<br>",
-      ruby: "{入力|にゅうりょく}された{情報|じょうほう}(ニックネーム, {年代|ねんだい})については、{以下|いか}の{用途|ようと}にて{利用|りよう}します。<br>-1. ゲームの{進行|しんこう}<br>-2. ランキング{表示|ひょうじ}<br>-3. ゲームごとの{累計|るいけい}プレイ{人数|にんずう}および{年代|ねんだい}{推移|すいい}<br>",
-      en:   "The information you enter (nickname, age group) will be used for the following purposes:<br>-1. Running the game<br>-2. Showing rankings<br>-3. Counting total players and age-group trends for each game<br>" },
+      ja:   "入力された情報(ニックネーム, 年代, 性別)については、以下の用途にて利用します。<br>-1. ゲームの進行<br>-2. ランキング表示<br>-3. ゲームごとの累計プレイ人数および年代・性別の推移<br>",
+      hira: "いれた じょうほう(ニックネーム、ねんだい、せいべつ)は、つぎの ことに つかいます。<br>-1. ゲームを すすめる ため<br>-2. ランキングを ひょうじする ため<br>-3. ゲームごとの あそんだ ひとの かずと ねんだい・せいべつの うつりかわり<br>",
+      ruby: "{入力|にゅうりょく}された{情報|じょうほう}(ニックネーム, {年代|ねんだい}, {性別|せいべつ})については、{以下|いか}の{用途|ようと}にて{利用|りよう}します。<br>-1. ゲームの{進行|しんこう}<br>-2. ランキング{表示|ひょうじ}<br>-3. ゲームごとの{累計|るいけい}プレイ{人数|にんずう}および{年代|ねんだい}・{性別|せいべつ}の{推移|すいい}<br>",
+      en:   "The information you enter (nickname, age group, gender) will be used for the following purposes:<br>-1. Running the game<br>-2. Showing rankings<br>-3. Counting total players and age-group and gender trends for each game<br>" },
     { type: "li",
       ja:   "公序良俗に反するニックネームを利用しないでください。",
       hira: "ほかの ひとが いやな きもちに なる ニックネームは つかわないでください。",

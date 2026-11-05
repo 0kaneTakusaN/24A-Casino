@@ -651,7 +651,7 @@ button:focus-visible,
   border-radius: 50%;
   border-width: 1.5px;
   text-align: center;
-  font-size: clamp(30px, 3.6vw, 40px);
+  font-size: clamp(24px, 3vw, 32px);   /* 3桁でも丸の中に収まる大きさ */
 }
 
 .players {
@@ -682,19 +682,28 @@ button:focus-visible,
   column-gap: clamp(28px, 5vw, 72px);
 }
 
-@media (min-width: 900px) {
+/* iPad・PC：入力枠と間隔にゆとりを持たせる（人数が多いときはスクロールする） */
+@media (min-width: 641px) {
+  #screen-3 {
+    padding-top: 104px;   /* 上部の黒い帯に「人数を入力」が隠れないように */
+  }
 
-  /* 6人以上は2列にして、10人でも画面内に収める */
+  #screen-3 .players {
+    margin-top: clamp(22px, 3.6vh, 38px);
+  }
+
   #player-rows {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(5, auto);
-    grid-auto-flow: column;
+    row-gap: clamp(12px, 1.8vh, 18px);
+  }
+
+  #player-rows .field {
+    height: clamp(44px, 6.2vh, 56px);
   }
 }
 
 .player-row {
   display: grid;
-  grid-template-columns: 6.6em minmax(0, 1fr) minmax(8.6em, 10.5em);
+  grid-template-columns: 6.6em minmax(0, 1fr) minmax(8.6em, 10.5em) minmax(8.6em, 10.5em);
   align-items: center;
   gap: 10px;
   animation: fade .3s ease both;
@@ -837,12 +846,13 @@ select.field option {
   }
 
   .player-row {
-    grid-template-columns: minmax(0, 1fr) 8.6em;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     row-gap: 6px;
     margin-top: 8px;
   }
 
-  .player-label {
+  .player-label,
+  .player-row .nick {
     grid-column: 1 / -1;
   }
 
@@ -1074,20 +1084,33 @@ html[data-ui="en"] .terms-box {
   }
 }
 
-/* 読み仮名版：年代のプルダウンに「(よみ)」が入るため、列を広げて文字を少し小さくする */
-html[data-ui="ruby"] .player-row {
-  grid-template-columns: 6.6em minmax(0, 1fr) 13em;
+/* 日本語以外：プルダウンの文字が長いため、列を広げて文字を少し小さくする */
+html[data-ui="ruby"] .player-row,
+html[data-ui="hira"] .player-row,
+html[data-ui="en"] .player-row {
+  grid-template-columns: 6.6em minmax(0, 1fr) 12.5em 12.5em;
 }
 
-html[data-ui="ruby"] select.field {
+html[data-ui="ruby"] select.field,
+html[data-ui="hira"] select.field,
+html[data-ui="en"] select.field {
   font-size: clamp(14px, 1.4vw, 17px);
   padding-left: .8em;
   padding-right: 1.9em;
 }
 
 @media (max-width: 640px) {
-  html[data-ui="ruby"] .player-row {
-    grid-template-columns: minmax(0, 1fr) 11.5em;
+  html[data-ui="ruby"] .player-row,
+  html[data-ui="hira"] .player-row,
+  html[data-ui="en"] .player-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 横画面の日本語：文字が大きくなる分、プルダウンの列を広げる */
+@media (min-width: 900px) and (orientation: landscape) {
+  html[data-ui="ja"] .player-row {
+    grid-template-columns: 6.6em minmax(0, 1fr) 11.5em 11.5em;
   }
 }
 
