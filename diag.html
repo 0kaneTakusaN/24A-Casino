@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>受付ログ診断</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { max-width: 640px; margin: 0 auto; padding: 16px; font: 16px/1.6 system-ui, sans-serif; }
+  h1 { font-size: 1.3rem; margin: 0 0 12px; }
+  label { display: block; font-weight: 600; }
+  input { width: 100%; box-sizing: border-box; margin: 4px 0 8px; padding: 10px; font-size: 16px; }
+  button { display: block; width: 100%; margin: 0 0 8px; padding: 12px; font-size: 16px; cursor: pointer; }
+  #log { list-style: none; margin: 16px 0 0; padding: 0; }
+  #log li { margin-bottom: 8px; padding: 8px 10px; border-left: 4px solid gray; overflow-wrap: anywhere; }
+  #log li.pass { border-color: #1a8a3a; }
+  #log li.fail { border-color: #d11a2a; }
+</style>
+</head>
+<body>
+  <h1>受付ログ診断</h1>
+
+  <label for="url">ウェブアプリのURL（…/exec）</label>
+  <input id="url" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec">
+  <button type="button" id="save">この端末に保存して診断</button>
+  <button type="button" id="run">診断をやり直す</button>
+  <button type="button" id="send-first">未送信の1件目を試し送信（シートに記録されます）</button>
+
+  <ul id="log" aria-live="polite"></ul>
+
+<script>
+(() => {
+  "use strict";
+
+  const ENDPOINT_KEY = "club-log-endpoint";
+  const QUEUE_KEY = "club-log-queue";
+  const REJECTED_KEY = "club-log-rejected";
+  const ENDPOINT_RE = /^https:\/\/script\.google\.com\/.+\/exec$/;
+  const TIMEOUT_MS = 20000;
+
+  const urlInput = document.querySelector("#url");
+  const logEl = document.querySelector("#log");
+  const buttons = [...document.querySelectorAll("button")];
+
+  function report(title, status, detail) {
+    const li = document.createElement("li");
+    li.className = status === true ? "pass" : status === false ? "fail" : "";
+    const mark = status === true ? "OK" : status === false ? "NG" : "--";
+    li.textContent = `${mark} ${title}：${detail}`;
+    logEl.appendChild(li);
+  }
+
+  function readItem(key) {
+    try { return localStorage.getItem(key); } catch (_) { return null; }
+  }
+  function readList(key) {
+    try {
+      const list = JSON.parse(readItem(key));
+      return Array.isArray(list) ? list : [];
+    } catch (_) {
+      return [];
+    }
+  }
+  const describeError = (err) => (err.name === "AbortError" ? "時間切れ" : `${err.name}: ${err.message}`);
+
+  async function request(url, options) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+    try {
+      const res = await fetch(url, {
+        redirect: "follow",
+        credentials: "omit",
+        cache: "no-store",
+        signal: ctrl.signal,
+        ...options,
+      });
+      return { status: res.status, text: await res.text() };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  const post = (url, body) => request(url, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(body),
+  });
+
+  function checkStorage() {
+    const key = "club-log-diag";
+    try {
+      localStorage.setItem(key, "1");
+      const ok = localStorage.getItem(key) === "1";
+      localStorage.removeItem(key);
+      report("端末への保存", ok, ok ? "使用できます" : "読み戻せません");
+    } catch (err) {
+      report("端末への保存", false, describeError(err));
+    }
+  }
+
+  async function checkSiteFiles() {
+    try {
+      const logger = await request("logger.js", { method: "GET" });
+      const page = await request("index.html", { method: "GET" });
+      const ok = logger.status === 200 && logger.text.includes(ENDPOINT_KEY) && page.text.includes('src="logger.js"');
+      report("公開ファイル", ok, `logger.js HTTP ${logger.status} / ${logger.text.length}文字、index.html HTTP ${page.status}`);
+    } catch (err) {
+      report("公開ファイル", false, describeError(err));
+    }
+  }
+
+  function checkEndpoint() {
+    const url = readItem(ENDPOINT_KEY);
+    if (!url) {
+      report("送信先の設定", false, "この端末には保存されていません");
+      return "";
+    }
+    const ok = ENDPOINT_RE.test(url);
+    report("送信先の設定", ok, `保存済み（${url.length}文字、末尾 …${url.slice(-12)}）`);
+    return ok ? url : "";
+  }
+
+  function checkRecords() {
+    const queue = readList(QUEUE_KEY);
+    const rejected = readList(REJECTED_KEY);
+    report("未送信の記録", queue.length === 0 ? true : null, `${queue.length}件`);
+    report("拒否された記録", rejected.length === 0, `${rejected.length}件`);
+  }
+
+  async function checkServer(url) {
+    try {
+      const r = await request(url, { method: "GET" });
+      report("接続確認（GET）", r.text.includes('"service":"club-log"'), `HTTP ${r.status} ${r.text.slice(0, 120)}`);
+    } catch (err) {
+      report("接続確認（GET）", false, describeError(err));
+    }
+    try {
+      // 検査で必ず拒否されるデータなので、シートには書き込まれない
+      const r = await post(url, {
+        groupID: "DIAG-INVALID",
+        timeStamp: "2000-01-01 00:00:00",
+        games: ["diag"],
+        players: [{ name: "diag", age: "成人" }],
+      });
+      report("送信確認（POST）", r.text.includes("invalid_games"), `HTTP ${r.status} ${r.text.slice(0, 120)}`);
+    } catch (err) {
+      report("送信確認（POST）", false, describeError(err));
+    }
+  }
+
+  async function diagnose() {
+    logEl.textContent = "";
+    report("ページ", null, `${location.origin}${location.pathname}（#endpoint ${location.hash.startsWith("#endpoint=") ? "あり" : "なし"}）`);
+    report("端末", null, `online=${navigator.onLine} / ${navigator.userAgent}`);
+    checkStorage();
+    await checkSiteFiles();
+    const url = checkEndpoint();
+    checkRecords();
+    if (url) await checkServer(url);
+  }
+
+  async function exclusive(task) {
+    buttons.forEach((b) => (b.disabled = true));
+    try {
+      await task();
+    } finally {
+      buttons.forEach((b) => (b.disabled = false));
+    }
+  }
+
+  document.querySelector("#run").addEventListener("click", () => exclusive(diagnose));
+
+  document.querySelector("#save").addEventListener("click", () => exclusive(async () => {
+    const url = urlInput.value.trim();
+    if (!ENDPOINT_RE.test(url)) {
+      report("URLの形式", false, "https://script.google.com/…/exec の形で入力してください");
+      return;
+    }
+    try {
+      localStorage.setItem(ENDPOINT_KEY, url);
+    } catch (err) {
+      report("URLの保存", false, describeError(err));
+      return;
+    }
+    await diagnose();
+  }));
+
+  document.querySelector("#send-first").addEventListener("click", () => exclusive(async () => {
+    const url = readItem(ENDPOINT_KEY);
+    const record = readList(QUEUE_KEY)[0] || readList(REJECTED_KEY)[0];
+    if (!url || !ENDPOINT_RE.test(url)) {
+      report("試し送信", false, "先に送信先を保存してください");
+      return;
+    }
+    if (!record) {
+      report("試し送信", null, "送る記録がありません");
+      return;
+    }
+    try {
+      const r = await post(url, record);
+      report("試し送信", r.text.includes('"ok":true'), `${record.groupID}：HTTP ${r.status} ${r.text.slice(0, 160)}`);
+    } catch (err) {
+      report("試し送信", false, describeError(err));
+    }
+  }));
+
+  exclusive(diagnose);
+})();
+</script>
+</body>
+</html>
