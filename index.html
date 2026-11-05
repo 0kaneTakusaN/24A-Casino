@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ja" data-ui="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>渡具知ダイヤモンドクラブ(仮称)</title>
+  <meta name="description" content="学園祭 渡具知ダイヤモンドクラブ">
+  <meta name="theme-color" content="#0b3a2c">
+  <link rel="preload" href="images/wallpaper.jpg" as="image">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="frame" aria-hidden="true"></div>
+
+  <!-- 表示言語の切り替え（右上の地球儀） -->
+  <div class="lang" id="lang">
+    <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="menu" aria-expanded="false"
+      aria-controls="lang-menu" aria-label="表示言語 / Language">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="9.5" />
+        <ellipse cx="12" cy="12" rx="4" ry="9.5" />
+        <path d="M2.5 12h19M4.2 7h15.6M4.2 17h15.6" />
+      </svg>
+    </button>
+    <ul class="lang-menu" id="lang-menu" role="menu" aria-label="表示言語 / Language" hidden>
+      <!-- 項目は script.js が i18n.js の LANGS から作ります -->
+    </ul>
+  </div>
+
+  <main id="app" data-screen="1">
+
+    <!-- 進行表示（②〜④で表示） -->
+    <ol class="steps" id="steps" data-i18n-aria-label="stepsAria" aria-label="進行状況">
+      <li data-step="2" data-i18n="step2">ゲーム</li>
+      <li data-step="3" data-i18n="step3">プレイヤー</li>
+      <li data-step="4" data-i18n="step4">利用規約</li>
+    </ol>
+
+    <!-- ① タイトル -->
+    <section class="screen is-active" id="screen-1" data-screen="1" aria-labelledby="title">
+      <div class="stage">
+        <h1 class="site-title" id="title">
+          <span class="sr-only" data-i18n="title">渡具知ダイヤモンドクラブ(仮称)</span>
+          <svg class="arc" viewBox="0 0 1000 150" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="mono" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffffff" />
+                <stop offset="1" stop-color="#9a9a9a" />
+              </linearGradient>
+              <path id="arc-path" d="M 40 128 A 1500 1500 0 0 1 960 128" />
+            </defs>
+            <text id="arc-text">
+              <textPath href="#arc-path" startOffset="50%" text-anchor="middle">渡具知ダイヤモンドクラブ(仮称)</textPath>
+            </text>
+          </svg>
+        </h1>
+        <p class="title-reading" data-i18n="titleReading" aria-hidden="true"></p>
+        <span class="rule" aria-hidden="true"></span>
+        <button type="button" class="chip" data-go="2"><span>PLAY</span></button>
+      </div>
+    </section>
+
+    <!-- ② ゲーム選択 -->
+    <section class="screen" id="screen-2" data-screen="2" aria-labelledby="h-games">
+      <h2 class="heading" id="h-games" data-i18n="gamesHeading">プレイするゲームを選択してください。(複数選択可能)</h2>
+
+      <div class="games" role="group" aria-labelledby="h-games">
+        <label class="game">
+          <input type="checkbox" name="game" value="blackjack">
+          <span class="card">
+            <span class="suit tl" aria-hidden="true">♠</span>
+            <img src="images/blackjack.png" alt="" width="320" height="320">
+            <span class="game-name" data-i18n="blackjack">ブラックジャック</span>
+            <span class="suit br" aria-hidden="true">♠</span>
+            <i class="tick" aria-hidden="true"></i>
+          </span>
+        </label>
+        <label class="game">
+          <input type="checkbox" name="game" value="poker">
+          <span class="card">
+            <span class="suit tl red" aria-hidden="true">♦</span>
+            <img src="images/poker.png" alt="" width="320" height="320">
+            <span class="game-name" data-i18n="poker">ポーカー</span>
+            <span class="suit br red" aria-hidden="true">♦</span>
+            <i class="tick" aria-hidden="true"></i>
+          </span>
+        </label>
+        <label class="game">
+          <input type="checkbox" name="game" value="roulette">
+          <span class="card">
+            <span class="suit tl" aria-hidden="true">♣</span>
+            <img src="images/roulette.png" alt="" width="320" height="320">
+            <span class="game-name" data-i18n="roulette">ルーレット</span>
+            <span class="suit br" aria-hidden="true">♣</span>
+            <i class="tick" aria-hidden="true"></i>
+          </span>
+        </label>
+      </div>
+
+      <p class="msg" id="msg-2" role="alert" aria-live="assertive"></p>
+
+      <div class="nav">
+        <button type="button" class="btn btn-ghost" data-go="1">BACK</button>
+        <button type="button" class="btn btn-solid" id="next-2">NEXT</button>
+      </div>
+    </section>
+
+    <!-- ③ プレイヤー情報 -->
+    <section class="screen" id="screen-3" data-screen="3" aria-labelledby="h-count">
+      <form class="info-form" id="info-form" novalidate>
+        <div class="count-row">
+          <label class="count-label" for="count" id="h-count" data-i18n="countLabel">人数を入力：</label>
+          <input class="field count-field" id="count" name="count" type="number" inputmode="numeric" min="1" max="10"
+            step="1" autocomplete="off" aria-describedby="msg-3">
+        </div>
+
+        <div class="players" id="players" hidden>
+          <p class="caption" data-i18n="caption">情報を入力：</p>
+          <!-- プレイヤー行は script.js が人数に合わせて生成する -->
+          <div id="player-rows"></div>
+        </div>
+
+        <p class="msg" id="msg-3" role="alert" aria-live="assertive"></p>
+
+        <div class="nav">
+          <button type="button" class="btn btn-ghost" data-go="2">BACK</button>
+          <button type="submit" class="btn btn-solid" id="next-3">NEXT</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ④ 利用規約 -->
+    <section class="screen" id="screen-4" data-screen="4" aria-labelledby="h-terms">
+      <h2 class="heading" id="h-terms" data-i18n="termsHeading">利用規約を確認してください。</h2>
+
+      <div class="terms-box" id="terms-box" tabindex="0" role="region" data-i18n-aria-label="termsAria"
+        aria-label="利用規約">
+        <!-- 利用規約の中身は i18n.js の TERMS を編集してください（script.js が下のリストに書き出します） -->
+        <ul class="terms-list" id="terms-list"></ul>
+      </div>
+
+      <label class="agree">
+        <input type="checkbox" id="agree">
+        <span class="agree-box" aria-hidden="true"></span>
+        <span class="agree-text" data-i18n="agree">これらの内容に同意します。</span>
+      </label>
+
+      <div class="nav">
+        <button type="button" class="btn btn-ghost" data-go="3">BACK</button>
+        <button type="button" class="btn btn-solid" id="next-4" data-go="5" disabled aria-hidden="true"
+          tabindex="-1">NEXT</button>
+      </div>
+    </section>
+
+    <!-- ⑤ チュートリアル -->
+    <section class="screen" id="screen-5" data-screen="5" aria-labelledby="h-tutorial">
+      <h2 class="heading" id="h-tutorial" data-i18n="tutorialHeading">チュートリアルを開始する</h2>
+
+      <div class="tutorial">
+        <!-- QR画像は qrCode/latestQr.jpg を読み込みます（この画面を開くたびに読み直します） -->
+        <div class="qr-box" id="qr-box">
+          <img id="qr-img" alt="" width="320" height="320">
+          <p class="qr-missing">qrCode/latestQr.jpg<br>が見つかりません</p>
+        </div>
+        <div class="tutorial-text">
+          <p data-i18n="tutorialBody1">お使いのスマートフォンから左のQRコードを読み込んで、チュートリアルを開始しましょう。</p>
+          <p data-i18n="tutorialBody2">ゲームルールを事前に把握している場合は、そのまま教室内の席に進んで頂いて構いません。</p>
+        </div>
+      </div>
+
+      <div class="nav nav-center">
+        <button type="button" class="btn btn-solid btn-wide" data-go="6">HAVE A FUN !</button>
+      </div>
+    </section>
+
+    <!-- ⑥ 受付完了 -->
+    <section class="screen" id="screen-6" data-screen="6" aria-labelledby="h-done">
+      <h2 class="heading" id="h-done" data-i18n="doneHeading">ありがとうございました。</h2>
+
+      <div class="done">
+        <p data-i18n="doneLine1">これにて受付の処理はすべて完了しました。</p>
+        <p data-i18n="doneLine2">入力端末をスタッフへ返却してください。</p>
+        <p data-i18n="doneLine3">ゲームをお楽しみください！</p>
+      </div>
+
+      <p class="press-hint" id="press-hint" role="status" aria-live="polite"></p>
+
+      <div class="nav">
+        <button type="button" class="btn btn-ghost" data-go="5">BACK</button>
+        <!-- 誤操作を防ぐため、3回押すと最初の画面に戻る -->
+        <button type="button" class="btn btn-solid" id="next-6">&gt;&gt;&gt;</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="i18n.js"></script>
+  <script src="logger.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
